@@ -1,0 +1,28 @@
+{
+  "booking": {
+    "deliveryType": "DELIVERYMAN",
+    "deliveryOption": "EMERGENCY",
+    "price": 125,
+    "couponId": "flashsale",
+    "categoryId": "680c1ff42db286a7a0d46526",
+    "bookingDate": "2025-04-01T10:30:00.000Z",
+    "status": "PENDING",
+    "notes": "Handle with care es"
+  },
+  "pickupLocation": {
+    "name": "John Doe",
+    "address": "123 Main St",
+    "apartment": "Apt 4B",
+    "phone": "+1 555-1234",
+    "lat": 23.760433,
+    "lng": 23.760433
+  },
+  "shippingAddress": {
+    "name": "Jane Smith",
+    "address": "456 Elm St",
+    "apartment": "Suite 22",
+    "phone": "+1 555-5678",
+    "lat": 23.756517,
+    "lng": 90.438949
+  }
+}

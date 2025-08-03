@@ -1,0 +1,131 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  email           String   @unique
+  phoneNumber     String
+  password        String
+  confirmPassword String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Customer {
+  id                     String               @id @default(auto()) @map("_id") @db.ObjectId
+  name                   String               @unique
+  primaryCalculatorId    String               @unique @db.ObjectId
+  primaryCalculator      PrimaryCalculator    @relation(fields: [primaryCalculatorId], references: [id])
+  investmentCalculatorId String               @unique @db.ObjectId
+  investmentCalculator   InvestmentCalculator @relation(fields: [investmentCalculatorId], references: [id])
+  fhaCalculatorId        String               @unique @db.ObjectId
+  fhaCalculator          FHACalculator        @relation(fields: [fhaCalculatorId], references: [id])
+  fixAndFlipCalculatorId String               @unique @db.ObjectId
+  fixAndFlipCalculator   FixAndFlipCalculator @relation(fields: [fixAndFlipCalculatorId], references: [id])
+  helocCalculatorId      String               @unique @db.ObjectId
+  helocCalculator        HELOCCalculator      @relation(fields: [helocCalculatorId], references: [id])
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+}
+
+// primary page calculator
+model PrimaryCalculator {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  purchasePrice Float
+  loanToValue   Float
+  downPayment Float
+  loanAmount Float
+  rate Float
+  mortgagePayment Int
+  taxAndInsurance Float
+  pmi Float
+  hoaFees Float
+  totalMonthlyPayment Float
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  customer  Customer?
+}
+
+model PrimaryHome {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  purchasePrice Float
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// investment page calculator
+model InvestmentCalculator {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  customer  Customer?
+}
+
+// FHA page calculator
+model FHACalculator {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Customer  Customer?
+}
+
+// Fix And Flip page calculator
+model FixAndFlipCalculator {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Customer  Customer?
+}
+
+// HELOC page calculator
+model HELOCCalculator {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Customer  Customer?
+}
+
+model Payment {
+  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  propertyName        String
+  appraisedValue      Float
+  purchasedValue      Float
+  loanAmount          Float
+  rate                Int
+  numberOfPaymentDone Int
+  monthlyPayment      Float
+  currentLoadAmount   Float
+  commission          Float
+  note                String
+  type                PaymentType
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PaymentType {
+  PIPELINE
+  CLOSED
+}
