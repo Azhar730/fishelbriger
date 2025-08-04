@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import { Secret } from "jsonwebtoken";
 import httpStatus from "http-status";
 import ApiError from "../../errors/ApiErrors";
-import { jwtHelpers } from "../../helpars/jwtHelpers";
 import config from "../../config";
 import prisma from "../../shared/prisma";
+import { JWTHelpers } from "../../helpars/jwtHelpers";
 
 const auth = (...roles: string[]) => {
   return async (
@@ -19,7 +19,7 @@ const auth = (...roles: string[]) => {
         throw new ApiError(httpStatus.UNAUTHORIZED, "You are not authorized!");
       }
 
-      const verifiedUser = jwtHelpers.verifyToken(
+      const verifiedUser = JWTHelpers.verifyToken(
         token,
         config.jwt.jwt_secret as Secret
       );
@@ -34,11 +34,11 @@ const auth = (...roles: string[]) => {
         throw new ApiError(httpStatus.NOT_FOUND, "This user is not found !");
       }
 
-      const userStatus = user?.status;
+      // const userStatus = user?.status;
 
-      if (userStatus === "BLOCKED") {
-        throw new ApiError(httpStatus.FORBIDDEN, "This user is blocked ! !");
-      }
+      // if (userStatus === "BLOCKED") {
+      //   throw new ApiError(httpStatus.FORBIDDEN, "This user is blocked ! !");
+      // }
 
       if (roles.length && !roles.includes(verifiedUser.role)) {
         throw new ApiError(httpStatus.FORBIDDEN, "Forbidden!");

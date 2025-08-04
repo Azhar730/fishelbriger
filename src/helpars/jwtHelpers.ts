@@ -1,20 +1,18 @@
-import jwt, { JwtPayload, Secret } from 'jsonwebtoken';
+import jwt, { JwtPayload, Secret, SignOptions } from "jsonwebtoken";
 
-const createToken = (
-  payload: Record<string, unknown>,
-  secret: Secret,
-  expireTime: string
-): string => {
-  return jwt.sign(payload, secret, {
-    expiresIn: expireTime,
-  });
+const generateToken = (payload: any, secret: Secret, expiresIn: string) => {
+  const token = jwt.sign(payload, secret, {
+    algorithm: "HS256",
+    expiresIn,
+  } as SignOptions);
+  return token;
 };
 
-const verifyToken = (token: string, secret: Secret): JwtPayload => {
+const verifyToken = (token: string, secret: Secret) => {
   return jwt.verify(token, secret) as JwtPayload;
 };
 
-export const jwtHelpers = {
-  createToken,
+export const JWTHelpers = {
+  generateToken,
   verifyToken,
 };

@@ -1,16 +1,21 @@
 import express from "express";
-import { AuthRouter } from "../modules/auth/auth.router";
-import { UserRoutes } from "../modules/user/user.route";
+import { AuthRoutes } from "../modules/auth/auth.router";
+import { ClientRoutes } from "../modules/client/client.route";
+import { CalculatorRoutes } from "../modules/calculator/calculator.route";
 const router = express.Router();
 
 const moduleRoutes: { path: string; route: any }[] = [
   {
     path: "/auth",
-    route: AuthRouter,
+    route: AuthRoutes,
   },
   {
-    path: "/user",
-    route: UserRoutes,
+    path: "/client",
+    route: ClientRoutes,
+  },
+  {
+    path: "/calculator",
+    route: CalculatorRoutes,
   },
 ];
 
