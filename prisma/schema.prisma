@@ -8,73 +8,215 @@ datasource db {
 }
 
 model User {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  name            String
-  email           String   @unique
-  phoneNumber     String
-  password        String
-  confirmPassword String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  client          Client[]
-}
-
-model Admin {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @unique
-  location  String?
+  name      String
+  email     String   @unique
+  password  String
+  photoURL String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Client {
-  id                String              @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String              @db.ObjectId
-  user              User                @relation(fields: [userId], references: [id])
-  name              String              @unique
-  calculatorId      String              @db.ObjectId
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  primaryCalculator PrimaryCalculator[]
+  id                             String                           @id @default(auto()) @map("_id") @db.ObjectId
+  name                           String
+  primaryCalculator              PrimaryCalculator[]
+  MonthlyExpenses                MonthlyExpenses[]
+  OtherMonthlyDebt               OtherMonthlyDebt[]
+  MonthlyIncome                  MonthlyIncome[]
+  CoSignerObligations            CoSignerObligations[]
+  RefinanceCalculator            RefinanceCalculator[]
+  CashoutCalculator              CashoutCalculator[]
+  RateTermThisYearCalculator     RateTermThisYearCalculator[]
+  RateTermPreviousYearCalculator RateTermPreviousYearCalculator[]
+  InvestmentLoan                 InvestmentLoan[]
+  FhaLoan                        FhaLoan[]
+  FhaMonthlyExpenses             FhaMonthlyExpenses[]
 }
 
 // PRIMARY HOME PAGE
 
 // primary calculator
 model PrimaryCalculator {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  clientId String @db.ObjectId
-  client   Client @relation(fields: [clientId], references: [id])
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId           String   @db.ObjectId
+  client             Client   @relation(fields: [clientId], references: [id])
+  purchasePrice      Float    @default(0)
+  loanToValuePercent Float    @default(0)
+  downPayment        Float    @default(0)
+  loanAmount         Float    @default(0)
+  ratePercent        Float    @default(0)
+  closingCost        Float    @default(0)
+  mortgagePayment    Int      @default(0)
+  taxAndInsurance    Float    @default(0)
+  pmi                Float    @default(0)
+  hoaFees            Float    @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
 
-  purchasePrice       Float
-  loanToValuePercent  Float
-  downPayment         Float
-  loanAmount          Float
-  rateParcent         Float
-  mortgagePayment     Int
-  taxAndInsurance     Float
-  pmi                 Float
-  hoaFees             Float
-  totalMonthlyPayment Float
+model RefinanceCalculator {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId            String   @db.ObjectId
+  client              Client   @relation(fields: [clientId], references: [id])
+  propertyValue       Float    @default(0)
+  loanToValuePercent  Float    @default(0)
+  loanAmount          Float    @default(0)
+  ratePercent         Float    @default(0)
+  mortgagePayment     Int      @default(0)
+  taxAndInsurance     Float    @default(0)
+  pmi                 Float    @default(0)
+  hoaFees             Float    @default(0)
+  totalMonthlyPayment Float    @default(0)
+  closingCost         Float    @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model CashoutCalculator {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId            String   @db.ObjectId
+  client              Client   @relation(fields: [clientId], references: [id])
+  purchasePrice       Float    @default(0)
+  loanToValuePercent  Float    @default(0)
+  downPayment         Float    @default(0)
+  loanAmount          Float    @default(0)
+  ratePercent         Float    @default(0)
+  mortgagePayment     Int      @default(0)
+  taxAndInsurance     Float    @default(0)
+  pmi                 Float    @default(0)
+  hoaFees             Float    @default(0)
+  renovationCosts     Float    @default(0)
+  otherExpenses       Float    @default(0)
+  totalMonthlyPayment Float    @default(0)
+  closingCost         Float    @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// rate term calculation
+model RateTermThisYearCalculator {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId          String   @db.ObjectId
+  client            Client   @relation(fields: [clientId], references: [id])
+  incorporationDate DateTime
+  businessName      String
+  k1Income          Float    @default(0)
+  ownershipPercent  Float    @default(0)
+  depreciation      Float    @default(0)
+  amortization      Float    @default(0)
+  totalIncome       Float    @default(0)
+}
+
+model RateTermPreviousYearCalculator {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId          String   @db.ObjectId
+  client            Client   @relation(fields: [clientId], references: [id])
+  incorporationDate DateTime
+  businessName      String
+  k1Income          Float    @default(0)
+  ownershipPercent  Float    @default(0)
+  depreciation      Float    @default(0)
+  amortization      Float    @default(0)
+  totalIncome       Float    @default(0)
+}
+
+// Monthly expenses
+model MonthlyExpenses {
+  id                     String @id @default(auto()) @map("_id") @db.ObjectId
+  clientId               String @db.ObjectId
+  client                 Client @relation(fields: [clientId], references: [id])
+  primaryMortgagePayment Float  @default(0)
+  propertyTax            Float  @default(0)
+  insurance              Float  @default(0)
+  pmi                    Float  @default(0)
+  hoa                    Float  @default(0)
+}
+
+model OtherMonthlyDebt {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  studentLoans Float  @default(0)
+  creditCards  Float  @default(0)
+  carLease     Float  @default(0)
+  personalLoan Float  @default(0)
+  otherDebt    Float  @default(0)
+  clientId     String @db.ObjectId
+  client       Client @relation(fields: [clientId], references: [id])
+}
+
+model CoSignerObligations {
+  id                     String @id @default(auto()) @map("_id") @db.ObjectId
+  coSignerDebits         Float  @default(0)
+  coSignerMortgageOrRent Float  @default(0)
+  coSignerHOA            Float  @default(0)
+  coSignerCarLease       Float  @default(0)
+  coSignerLoans          Float  @default(0)
+  coSignerCreditCards    Float  @default(0)
+  clientId               String @db.ObjectId
+  client                 Client @relation(fields: [clientId], references: [id])
+}
+
+model MonthlyIncome {
+  id             String @id @default(auto()) @map("_id") @db.ObjectId
+  borrowerSalary Float  @default(0)
+  childSupport   Float  @default(0)
+  subjectAddUnit Float  @default(0)
+  totalIncome    Float  @default(0)
+  clientId       String @db.ObjectId
+  client         Client @relation(fields: [clientId], references: [id])
 }
 
 // investment page calculator
-model InvestmentCalculator {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model InvestmentLoan {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId           String   @db.ObjectId
+  client             Client   @relation(fields: [clientId], references: [id])
+  purchasePrice      Float    @default(0)
+  loanToValuePercent Float    @default(0)
+  downPayment        Float    @default(0)
+  loanAmount         Float    @default(0)
+  ratePercent        Float    @default(0)
+  closingCost        Float    @default(0)
+  mortgagePayment    Int      @default(0)
+  taxAndInsurance    Float    @default(0)
+  pmi                Float    @default(0)
+  hoaFees            Float    @default(0)
+  renovationCosts    Float    @default(0)
+  otherExpenses      Float    @default(0)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
 
 // FHA page calculator
-model FHACalculator {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
+model FhaLoan {
+  id                  String   @id @default(auto()) @map("_id") @db.ObjectId
+  clientId            String   @db.ObjectId
+  client              Client   @relation(fields: [clientId], references: [id])
+  purchasePrice       Float    @default(0)
+  loanToValuePercent  Float    @default(0)
+  downPayment         Float    @default(0)
+  loanAmount          Float    @default(0)
+  ufmip               Float    @default(0)
+  ratePercent         Float    @default(0)
+  mortgagePayment     Int      @default(0)
+  taxAndInsurance     Float    @default(0)
+  mip                 Float    @default(0)
+  hoaFees             Float    @default(0)
+  totalMonthlyPayment Float    @default(0)
+  closingCost         Float    @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model FhaMonthlyExpenses {
+  id                     String @id @default(auto()) @map("_id") @db.ObjectId
+  clientId               String @db.ObjectId
+  client                 Client @relation(fields: [clientId], references: [id])
+  primaryMortgagePayment Float  @default(0)
+  propertyTax            Float  @default(0)
+  insurance              Float  @default(0)
+  mip                    Float  @default(0)
+  hoa                    Float  @default(0)
 }
 
 // Fix And Flip page calculator
@@ -93,150 +235,42 @@ model HELOCCalculator {
   updatedAt DateTime @updatedAt
 }
 
-model Payment {
-  id                  String      @id @default(auto()) @map("_id") @db.ObjectId
-  name                String
-  propertyName        String
-  appraisedValue      Float
-  purchasedValue      Float
-  loanAmount          Float
-  rate                Int
-  numberOfPaymentDone Int
-  monthlyPayment      Float
-  currentLoadAmount   Float
-  commission          Float
-  note                String
-  type                PaymentType
+// model Client {
+//   id                  String @id @default(auto()) @map("_id") @db.ObjectId
+//   clientName          String @unique
+//   propertyName        String
+//   appraisedValue      Float
+//   purchasePrice       Float
+//   loanAmount          Float
+//   rate                Float
+//   numberOfPaymentDone Int
+//   monthlyPayment      Float
+//   currentLoanAmount   Float
+//   myCommission        Float
+//   note                String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
+//   createdAt         DateTime            @default(now())
+//   updatedAt         DateTime            @updatedAt
+//   primaryCalculator PrimaryCalculator[]
+// }
 enum PaymentType {
   PIPELINE
   CLOSED
 }
 
-// model Customer {
-//   id                     String               @id @default(auto()) @map("_id") @db.ObjectId
-//   name                   String               @unique
-//   primaryCalculatorId    String               @unique @db.ObjectId
-//   primaryCalculator      PrimaryCalculator    @relation(fields: [primaryCalculatorId], references: [id])
-//   investmentCalculatorId String               @unique @db.ObjectId
-//   investmentCalculator   InvestmentCalculator @relation(fields: [investmentCalculatorId], references: [id])
-//   fhaCalculatorId        String               @unique @db.ObjectId
-//   fhaCalculator          FHACalculator        @relation(fields: [fhaCalculatorId], references: [id])
-//   fixAndFlipCalculatorId String               @unique @db.ObjectId
-//   fixAndFlipCalculator   FixAndFlipCalculator @relation(fields: [fixAndFlipCalculatorId], references: [id])
-//   helocCalculatorId      String               @unique @db.ObjectId
-//   helocCalculator        HELOCCalculator      @relation(fields: [helocCalculatorId], references: [id])
-//   createdAt              DateTime             @default(now())
-//   updatedAt              DateTime             @updatedAt
-// }
+enum CoSignerDebtType {
+  CO_SIGNER_DEBITS
+  CO_SIGNER_MORTGAGE_OR_RENT
+  CO_SIGNER_HOA
+  CO_SIGNER_CAR_LEASE
+  CO_SIGNER_LOANS
+  CO_SIGNER_CREDIT_CARDS
+}
 
-// model Calculator {
-//   id              String       @id @default(auto()) @map("_id") @db.ObjectId
-//   clientId        String
-//   mortgageType    MortgageType
-//   loanTerm        LoanTerm     @default(THIRTY_YEAR)
-//   purchasePrice   Float?
-//   ltvPercent      Float?
-//   downPayment     Float?
-//   loanAmount      Float?
-//   ratePercent     Float?
-//   mortgagePayment Float?
-//   closingCost     Float?
-//   fhaLoan         Boolean      @default(false)
-//   refinance       Boolean      @default(false)
-//   fixAndFlip      Boolean      @default(false)
-//   heloc           Boolean      @default(false)
-//   client          Client[]
-//   expense         Expense[]
-//   income          Income[]
-//   createdAt       DateTime     @default(now())
-//   updatedAt       DateTime     @updatedAt
-// }
-
-// model Toggle {
-//   id        String     @id @default(auto()) @map("_id") @db.ObjectId
-//   clientId  String     @db.ObjectId
-//   client    Client     @relation(fields: [clientId], references: [id])
-//   type      ToggleType
-//   value     Boolean
-//   createdAt DateTime   @default(now())
-// }
-
-// model Expense {
-//   id           String        @id @default(auto()) @map("_id") @db.ObjectId
-//   calculatorId String        @db.ObjectId
-//   calculator   Calculator    @relation(fields: [calculatorId], references: [id])
-//   type         ExpenseType
-//   amount       Float
-//   frequency    FrequencyType
-//   createdAt    DateTime      @default(now())
-// }
-
-// model Income {
-//   id           String        @id @default(auto()) @map("_id") @db.ObjectId
-//   calculatorId String        @db.ObjectId
-//   calculator   Calculator    @relation(fields: [calculatorId], references: [id])
-//   type         IncomeType
-//   amount       Float
-//   frequency    FrequencyType
-//   createdAt    DateTime      @default(now())
-// }
-
-// enum MortgageType {
-//   PRIMARY
-//   INVESTMENT
-// }
-
-// enum LoanTerm {
-//   TEN_YEAR
-//   FIFTEEN_YEAR
-//   TWENTY_YEAR
-//   THIRTY_YEAR
-// }
-
-// enum ToggleType {
-//   INVESTMENT
-//   FHA
-//   REFINANCE
-//   FIX_AND_FLIP
-//   HELOC
-// }
-
-// enum ExpenseType {
-//   MORTGAGE
-//   PROPERTY_TAX
-//   INSURANCE
-//   PMI
-//   HOA
-//   STUDENT_LOAN
-//   CREDIT_CARD
-//   CAR_LEASE
-//   PERSONAL_LOAN
-//   OTHER_DEBT
-//   CO_SIGNER
-// }
-
-// enum FrequencyType {
-//   MONTHLY
-//   ANNUAL
-//   WEEKLY
-//   BI_WEEKLY
-//   SEMI_MONTHLY
-//   QUARTERLY
-//   HALF_YEARLY
-// }
-
-// enum IncomeType {
-//   BORROWER_SALARY
-//   COBORROWER_SALARY
-//   CHILD_SUPPORT
-//   SSA_SSI
-//   BUSINESS
-//   REO
-//   SUBJECT_UNIT
-//   OTHER
-// }
+enum MonthlyDebtType {
+  STUDENT_LOANS
+  CREDIT_CARDS
+  CAR_LEASE
+  PERSONAL_LOAN
+  OTHER_DEBT
+}

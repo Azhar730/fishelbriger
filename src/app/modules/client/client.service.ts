@@ -1,22 +1,20 @@
-import { Client } from "@prisma/client";
-import prisma from "../../../shared/prisma";
+import { Client, PrismaClient } from "@prisma/client";
+import { IGenericResponse } from "../../../interfaces/common";
+import QueryBuilder from "../../../helpars/queryBuilder";
+import { ClientSearchableFields } from "./client.constant";
 
-const createClientIntoDB = async (payload: Client, id: string) => {
 
-    const result = await prisma.client.create({ data: { name: payload.name, userId: id, calculatorId: payload.calculatorId } })
+const prisma = new PrismaClient()
+const createClientIntoDB = async (payload: Client) => {
+    const result = await prisma.client.create({ data: payload })
     return result
 };
 
-const getClientsFromDB = async (id: string) => {
-    const result = await prisma.client.findMany({
-        where: {
-            userId: id
-        },
-        include: {
-            calculator: true
-        }
-    })
-    return result
+const getClientsFromDB = async (query: Record<string, any>): Promise<IGenericResponse<Client[]>> => {
+    const queryBuilder = new QueryBuilder(prisma.client, query)
+    const clients = await queryBuilder.range().search(ClientSearchableFields).filter().sort().paginate().fields().execute()
+    const meta = await queryBuilder.countTotal()
+    return { meta, data: clients }
 }
 export const ClientServices = {
     createClientIntoDB,

@@ -1,64 +1,72 @@
-import { Calculator } from "@prisma/client";
+
+import { PrimaryCalculator } from "@prisma/client";
 import prisma from "../../../shared/prisma";
 
-const createOrUpdateCalculatorIntoDB = async (payload: Calculator, id: string) => {
-    const { clientId, purchasePrice, loanAmount, downPayment, ltvPercent, mortgageType } = payload
+const createOrUpdateCalculatorIntoDB = async (payload: PrimaryCalculator, id: string) => {
+    const {
+    purchasePrice,
+    loanToValuePercent,
+    downPayment,
+    loanAmount,
+    rateParcent,
+    termInYears,
+    closingCost,
+    taxAndInsurance,
+    pmi,
+    hoaFees
+  } = payload
 
-    let finalLoanAmount = loanAmount
-    let finalDownPayment = downPayment
-    let finalLtvPercent = ltvPercent
+  // Bidirectional calculations
+  let finalLoanAmount = loanAmount
+  let finalDownPayment = downPayment
+  let finalLTVPercent = loanToValuePercent
 
-    // case-1: if just loan amount
-    if (loanAmount && !ltvPercent && !downPayment) {
-        finalLtvPercent = (loanAmount / purchasePrice!) * 100
-        finalDownPayment = purchasePrice! - loanAmount
-    }
+  // 1. Calculate loanAmount if not given
+  if (!finalLoanAmount && finalLTVPercent !== undefined) {
+    finalLoanAmount = (finalLTVPercent / 100) * purchasePrice
+  } else if (!finalLoanAmount && finalDownPayment !== undefined) {
+    finalLoanAmount = purchasePrice - finalDownPayment
+  }
 
-    // case-2: if just ltv percent
-    else if (!loanAmount && ltvPercent && !downPayment) {
-        finalLoanAmount = (ltvPercent / 100) * purchasePrice!
-        finalDownPayment = purchasePrice! - finalLoanAmount
-    }
+  // 2. Calculate downPayment if not given
+  if (!finalDownPayment && finalLoanAmount !== undefined) {
+    finalDownPayment = purchasePrice - finalLoanAmount
+  }
 
-    // case-3: if just down payment
-    else if (!loanAmount && !ltvPercent && downPayment) {
-        finalLoanAmount = purchasePrice! - downPayment;
-        finalLtvPercent = (finalLoanAmount / purchasePrice!) * 100;
-    }
-    // update or create logic
-    const existingCalculator = await prisma.calculator.findFirst({
-        where: {
-            clientId
-        }
-    })
-    if (existingCalculator) {
-        // Update
-        return prisma.calculator.update({
-            where: {
-                id: existingCalculator.id
-            },
-            data: {
-                purchasePrice,
-                loanAmount: finalLoanAmount,
-                downPayment: finalDownPayment,
-                ltvPercent: finalLtvPercent,
-                mortgageType
-            }
-        })
-    } else {
-        // Create
-        return prisma.calculator.create({
-            data: {
-                clientId,
-                purchasePrice,
-                loanAmount: finalLoanAmount,
-                downPayment: finalDownPayment,
-                ltvPercent: finalLtvPercent,
-                mortgageType
+  // 3. Calculate LTV% if not given
+  if (!finalLTVPercent && finalLoanAmount !== undefined) {
+    finalLTVPercent = (finalLoanAmount / purchasePrice) * 100
+  }
 
-            }
-        })
-    }
+  // 4. Calculate Mortgage Payment using loanAmount and rate
+  const monthlyRate = rateParcent / 100 / 12
+  const totalPayments = termInYears * 12
+
+  let mortgagePayment = 0
+  if (finalLoanAmount) {
+    const power = Math.pow(1 + monthlyRate, totalPayments)
+    mortgagePayment = Math.round(
+      finalLoanAmount * ((monthlyRate * power) / (power - 1))
+    )
+  }
+
+  // 5. Calculate total monthly payment
+  const totalMonthlyPayment =
+    mortgagePayment + taxAndInsurance + pmi + hoaFees
+
+  return {
+    purchasePrice,
+    loanToValuePercent: finalLTVPercent,
+    downPayment: finalDownPayment,
+    loanAmount: finalLoanAmount,
+    rateParcent,
+    closingCost,
+    mortgagePayment,
+    taxAndInsurance,
+    pmi,
+    hoaFees,
+    totalMonthlyPayment
+  }
 }
 
 export const CalculatorServices = {
